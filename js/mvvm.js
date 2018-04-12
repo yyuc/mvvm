@@ -9,7 +9,7 @@ function MVVM(options) {
 
     observe(data);
 
-    this.$compile = new Compile(options.el || document.body, this)
+    new Compile(options.el, this)
 }
 
 MVVM.prototype = {
