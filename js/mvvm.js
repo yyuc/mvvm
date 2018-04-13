@@ -1,5 +1,5 @@
-function MVVM(options) {
-    this.$options = options || {};
+function MVVM(options = {}) {
+    this.$options = options;
     var data = this._data = this.$options.data;
     var me = this;
 
@@ -7,16 +7,12 @@ function MVVM(options) {
         me._proxyData(key);
     });
 
-    observe(data);
+    new Observer(data);
 
     new Compile(options.el, this)
 }
 
 MVVM.prototype = {
-    $watch: function (key, cb, options) {
-        new Watcher(this, key, cb);
-    },
-
     _proxyData: function (key, setter, getter) {
         var me = this;
         setter = setter ||

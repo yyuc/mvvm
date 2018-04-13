@@ -56,13 +56,8 @@ Compile.prototype = {
             if (me.isDirective(attrName)) {
                 var exp = attr.value;
                 var dir = attrName.substring(2);
-                // 事件指令
-                if (me.isEventDirective(dir)) {
-                    compileUtil.eventHandler(node, me.$vm, exp, dir);
-                    // 普通指令
-                } else {
-                    compileUtil[dir] && compileUtil[dir](node, me.$vm, exp);
-                }
+
+                compileUtil[dir] && compileUtil[dir](node, me.$vm, exp);
 
                 node.removeAttribute(attrName);
             }
@@ -75,10 +70,6 @@ Compile.prototype = {
 
     isDirective: function (attr) {
         return attr.indexOf('v-') == 0;
-    },
-
-    isEventDirective: function (dir) {
-        return dir.indexOf('on') === 0;
     },
 
     isElementNode: function (node) {
@@ -113,23 +104,14 @@ var compileUtil = {
     },
 
     bind: function (node, vm, exp, dir) {
-        var updaterFn = updater[dir + 'Updater'];
+        let updaterFn = dir === 'model' ?
+            (node, value) => (node.value = typeof value === 'undefined' ? '' : value) :
+            (node, value) => (node.textContent = typeof value === 'undefined' ? '' : value)
 
-        updaterFn && updaterFn(node, vm[exp]);
+        updaterFn(node, vm[exp]);
 
         new Watcher(vm, exp, function (value, oldValue) {
-            updaterFn && updaterFn(node, value, oldValue);
+            updaterFn(node, value, oldValue);
         });
     },
-};
-
-
-var updater = {
-    textUpdater: function (node, value) {
-        node.textContent = typeof value == 'undefined' ? '' : value;
-    },
-
-    modelUpdater: function (node, value, oldValue) {
-        node.value = typeof value == 'undefined' ? '' : value;
-    }
-};
+}
